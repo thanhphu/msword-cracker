@@ -119,9 +119,20 @@ int main(int argc, char *argv[]) {
         int charlen = strlen(charset);
         char offsets[16] = { 0 };
         char password[17] = { 0 };
+        int level = 1;
+        std::cout << "Entering level " << level << std::endl;
         while (1) {
-            for (int i = 0; ++offsets[i] > charlen; i++)
+            for (int i = 0; ++offsets[i] > charlen; i++) {
                 offsets[i] = 1;
+                if (i >= level - 1) {
+                    std::cout << "Entering level " << ++level << std::endl;
+                    if (level > 16) {
+                        std::cout << "Passwords only go up to 16 characters "
+                            "in Microsoft Word documents" << std::endl;
+                        return 1;
+                    }
+                }
+            }
             
             for (int i = 0; offsets[i]; i++)
                 password[i] = charset[offsets[i] - 1];
@@ -131,8 +142,7 @@ int main(int argc, char *argv[]) {
                 return 0;
             }
         }
-        std::cout << "Passwords only go up to 16 characters "
-            "in Microsoft Word documents" << std::endl;
+        std::cout << "The impossible, it happened" << std::endl;
         return 1;
     }
 }

@@ -1,11 +1,13 @@
 #include <iostream>
 #include <cstdio>
+#include <unistd.h>
 #include "wv.h"
 
 class WordDoc {
 public:
     WordDoc(char *filename) {
         int ret = wvInitParser(&ps, filename);
+        exists = ret != 3;
         version = ret & 0x7fff;
         recognized_version =
             version == WORD6 ||
@@ -28,22 +30,37 @@ public:
     
     bool password_protected;
     bool recognized_version;
+    bool exists;
     int version;
     
 private:
     wvParseStruct ps;
 };
 
+#define usage() { \
+    printf("Usage: %s -p password file.doc\n", argv[0]); \
+    return 1; \
+}
+
 int main(int argc, char *argv[]) {
     wvInit();
     
-    if (argc != 3) {
-        printf("Usage: %s file password\n", argv[0]);
-        return 1;
+    char action, opt;
+    while ((opt = getopt(argc, argv, "p")) != -1) {
+        switch (opt) {
+            case 'p' : action = opt; break;
+            default: usage();
+        }
     }
     
-    WordDoc doc(argv[1]);
-    if (doc.password_protected == false) {
+    if (optind >= argc - 1) usage();
+    char *docfile = argv[++optind];
+    WordDoc doc(docfile);
+    
+    if (doc.exists == false) {
+        std::cout << "No such file: " << docfile << std::endl;
+    }
+    else if (doc.password_protected == false) {
         std::cout << "Success? The document is not encrypted." << std::endl;
         return 1;
     }
@@ -51,12 +68,14 @@ int main(int argc, char *argv[]) {
         std::cout << "File format not recognized" << std::endl;
         return 1;
     }
-    else if (doc.check_password(argv[2]) == false) {
+    else if (action == 'p' && doc.check_password(argv[2]) == false) {
         std::cout << "Incorrect" << std::endl;
         return 1;
     }
-    else {
+    else if (action == 'p') {
         std::cout << "Correct" << std::endl;
         return 0;
     }
 }
+
+#undef usage

@@ -1,0 +1,9 @@
+msword-cracker
+--------------
+
+Crack Microsoft Word 95 and 97 passwords with the magic of wvware.
+
+You will need:
+    libwv-dev libgsf-1-dev glib2-dev 
+
+This software is licensed under the GNU GPL v3 or any later version.
